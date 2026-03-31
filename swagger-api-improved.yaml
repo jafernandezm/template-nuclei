@@ -1,0 +1,326 @@
+id: swagger-api
+
+info:
+  name: Public Swagger API - Detect
+  author: pdteam,c-sh0,AmirHossein Raeisi,Eduardo Quintanilha
+  severity: info
+  description: |
+    Public Swagger API was detected.
+  reference:
+    - https://swagger.io/
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N
+    cwe-id: CWE-200
+  metadata:
+    verified: true
+    max-request: 120
+    shodan-query: "http.title:\"swagger\""
+  tags: exposure,api,swagger,openapi,discovery
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}{{paths}}"
+
+    payloads:
+      paths:
+        # ============================================================
+        # SWAGGER 2.0 / ORIGINAL PATHS (ya probados y funcionando)
+        # ============================================================
+        - "/v2/api-docs"
+        - "/v1/api-docs"
+        - "/api-docs"
+        - "/swagger-ui/swagger-ui.js"
+        - "/swagger/swagger-ui.js"
+        - "/swagger-ui.js"
+        - "/swagger/ui/swagger-ui.js"
+        - "/swagger/ui/index"
+        - "/swagger/index.html"
+        - "/swagger-ui.html"
+        - "/swagger/swagger-ui.html"
+        - "/api/swagger-ui.html"
+        - "/api-docs/swagger.json"
+        - "/api-docs/swagger.yaml"
+        - "/api_docs"
+        - "/swagger.json"
+        - "/swagger.yaml"
+        - "/swagger/v1/swagger.json"
+        - "/swagger/v1/swagger.yaml"
+        - "/api/index.html"
+        - "/api/doc"
+        - "/api/docs/"
+        - "/api/swagger.json"
+        - "/api/swagger.yaml"
+        - "/api/swagger.yml"
+        - "/api/swagger/index.html"
+        - "/api/swagger/swagger-ui.html"
+        - "/api/api-docs/swagger.json"
+        - "/api/api-docs/swagger.yaml"
+        - "/api/swagger-ui/swagger.json"
+        - "/api/swagger-ui/swagger.yaml"
+        - "/api/apidocs/swagger.json"
+        - "/api/apidocs/swagger.yaml"
+        - "/api/swagger-ui/api-docs"
+        - "/api/doc.json"
+        - "/api/api-docs"
+        - "/api/apidocs"
+        - "/api/swagger"
+        - "/api/swagger/static/index.html"
+        - "/api/swagger-resources"
+        - "/api/swagger-resources/restservices/v2/api-docs"
+        - "/api/__swagger__/"
+        - "/api/_swagger_/"
+        - "/api/spec/swagger.json"
+        - "/api/spec/swagger.yaml"
+        - "/api/swagger/ui/index"
+        - "/__swagger__/"
+        - "/_swagger_/"
+        - "/api/v1/swagger-ui/swagger.json"
+        - "/api/v1/swagger-ui/swagger.yaml"
+        - "/swagger-resources/restservices/v2/api-docs"
+        - "/api/swagger_doc.json"
+        - "/docu"
+        - "/docs"
+        - "/docs/"
+        - "/swagger"
+        - "/api-doc"
+        - "/doc/"
+        - "/swagger-ui/springfox.js"
+        - "/swagger-ui/swagger-ui-standalone-preset.js"
+        - "/swagger-ui/swagger-ui/swagger-ui-bundle.js"
+        - "/webjars/swagger-ui/swagger-ui-bundle.js"
+        - "/webjars/swagger-ui/index.html"
+        - "/developers/documentation"
+
+        # ============================================================
+        # OPENAPI 3.x / SPRINGDOC (Spring Boot moderno)
+        # Springdoc reemplazó Springfox como estándar en Spring Boot 3+
+        # Rutas confirmadas en múltiples targets reales
+        # ============================================================
+        - "/v3/api-docs"
+        - "/v3/api-docs/swagger-config"
+        - "/v3/api-docs.yaml"
+        - "/api/v3/api-docs"
+        - "/api/v3/api-docs.yaml"
+        - "/openapi.json"
+        - "/openapi.yaml"
+        - "/openapi.yml"
+        - "/api/openapi.json"
+        - "/api/openapi.yaml"
+        - "/api/openapi.yml"
+        - "/openapi/v3/api-docs"
+
+        # ============================================================
+        # SWAGGER-UI VARIANTES (diferentes montajes de UI)
+        # Muy comunes en despliegues custom
+        # ============================================================
+        - "/swagger-ui/"
+        - "/swagger-ui"
+        - "/swagger-ui/index.html"
+        - "/api/swagger-ui/"
+        - "/api/swagger-ui/index.html"
+        - "/swagger/ui/"
+        - "/swagger/ui/index.html"
+
+        # ============================================================
+        # FASTAPI / STARLETTE (Python)
+        # FastAPI genera /docs (Swagger) y /redoc por defecto
+        # Encontrado masivamente en startups y APIs modernas
+        # ============================================================
+        - "/docs/oauth2-redirect"
+        - "/redoc"
+        - "/redoc/"
+        - "/api/redoc"
+        - "/api/redoc/"
+
+        # ============================================================
+        # VERSIONADO DE APIs - v1, v2, v3
+        # Muchos devs montan la doc bajo /api/vN/
+        # ============================================================
+        - "/api/v1/api-docs"
+        - "/api/v1/swagger.json"
+        - "/api/v1/swagger.yaml"
+        - "/api/v1/docs"
+        - "/api/v1/doc"
+        - "/api/v2/api-docs"
+        - "/api/v2/swagger.json"
+        - "/api/v2/swagger.yaml"
+        - "/api/v2/docs"
+        - "/api/v2/doc"
+        - "/api/v3/swagger.json"
+        - "/api/v3/swagger.yaml"
+        - "/api/v3/docs"
+        - "/swagger/v2/swagger.json"
+        - "/swagger/v2/swagger.yaml"
+        - "/swagger/v3/swagger.json"
+        - "/swagger/v3/swagger.yaml"
+        - "/v1/swagger.json"
+        - "/v1/swagger.yaml"
+        - "/v2/swagger.json"
+        - "/v2/swagger.yaml"
+        - "/v3/swagger.json"
+        - "/v3/swagger.yaml"
+
+        # ============================================================
+        # SWAGGER EN SUBDIRECTORIOS COMUNES
+        # /rest/, /service/, /internal/, /public/, /external/
+        # Encontrados en enterprise targets
+        # ============================================================
+        - "/rest/api-docs"
+        - "/rest/swagger.json"
+        - "/rest/swagger.yaml"
+        - "/rest/v2/api-docs"
+        - "/rest/v3/api-docs"
+        - "/service/swagger.json"
+        - "/service/swagger.yaml"
+        - "/service/api-docs"
+        - "/public/api-docs"
+        - "/public/swagger.json"
+        - "/internal/api-docs"
+        - "/internal/swagger.json"
+        - "/internal/docs"
+        - "/external/api-docs"
+
+        # ============================================================
+        # .NET / SWASHBUCKLE / NSwag
+        # ASP.NET Core expone swagger bajo estos paths
+        # ============================================================
+        - "/swagger/docs/v1"
+        - "/swagger/docs/v2"
+        - "/swagger/v1/swagger.json"  # ya estaba, kept for reference
+        - "/api/swagger/docs/v1"
+        - "/api/swagger/docs/v2"
+
+        # ============================================================
+        # SWAGGER-RESOURCES (Springfox legacy)
+        # Revelan configuración interna del Swagger
+        # ============================================================
+        - "/swagger-resources"
+        - "/swagger-resources/"
+        - "/swagger-resources/configuration/ui"
+        - "/swagger-resources/configuration/security"
+        - "/api/swagger-resources/configuration/ui"
+        - "/api/swagger-resources/configuration/security"
+
+        # ============================================================
+        # GRAPHQL PLAYGROUND / DOCS (bonus - misma lógica de API expuesta)
+        # No es Swagger pero misma categoría de API docs expuestas
+        # ============================================================
+        - "/graphql"
+        - "/graphiql"
+        - "/graphql/playground"
+        - "/api/graphql"
+        - "/api/graphiql"
+        - "/graphql/console"
+        - "/altair"
+        - "/api/graphql/playground"
+
+        # ============================================================
+        # SCALAR (nueva herramienta de API docs, ganando tracción)
+        # Reemplaza Swagger UI en varios proyectos modernos
+        # ============================================================
+        - "/scalar"
+        - "/scalar/"
+        - "/api/scalar"
+        - "/scalar/index.html"
+        - "/reference"
+        - "/api/reference"
+
+        # ============================================================
+        # RAPIDOC / ELEMENTS (alternativas a Swagger UI)
+        # ============================================================
+        - "/rapidoc"
+        - "/rapidoc/"
+        - "/api/rapidoc"
+        - "/elements"
+        - "/api/elements"
+
+        # ============================================================
+        # DOCUMENTATION / DOC ENDPOINTS GENÉRICOS
+        # ============================================================
+        - "/documentation"
+        - "/api/documentation"
+        - "/api/documentation/"
+        - "/api-documentation"
+        - "/api-explorer"
+        - "/api-explorer/"
+
+        # ============================================================
+        # WEBJARS VARIANTES (versiones de swagger-ui empaquetadas)
+        # ============================================================
+        - "/webjars/swagger-ui/3.52.5/index.html"
+        - "/webjars/swagger-ui/4.15.5/index.html"
+        - "/webjars/swagger-ui/5.0.0/index.html"
+
+    headers:
+      Accept: text/html, application/json, application/yaml
+
+    stop-at-first-match: true
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          # Swagger 2.x
+          - "swagger:"
+          - "Swagger 2.0"
+          - "\"swagger\":"
+          - "Swagger UI"
+          - "loadSwaggerUI"
+          - "**token**:"
+          - "id=\"swagger-ui"
+          # OpenAPI 3.x
+          - "\"openapi\":"
+          - "openapi:"
+          - "openapi: \"3"
+          - "openapi: 3"
+          - "\"openapi\":\"3"
+          # Springdoc / swagger-config
+          - "configUrl"
+          - "swagger-config"
+          # Swagger UI bundle
+          - "SwaggerUIBundle"
+          - "swagger-ui-bundle"
+          - "swagger-ui-standalone-preset"
+          # Redoc
+          - "redoc"
+          - "ReDoc"
+          # GraphQL
+          - "__schema"
+          - "graphiql"
+          - "GraphQL Playground"
+          - "GraphiQL"
+          # Scalar
+          - "scalar"
+          - "@scalar/api-reference"
+          # RapiDoc
+          - "rapi-doc"
+          - "rapidoc"
+          # Stoplight Elements
+          - "stoplight"
+          - "elements-api"
+        condition: or
+
+      - type: status
+        status:
+          - 200
+
+    extractors:
+      - type: regex
+        part: body
+        group: 1
+        regex:
+          - " @version (v[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3})"
+      - type: regex
+        name: openapi-version
+        part: body
+        group: 1
+        regex:
+          - "\"openapi\":\\s*\"([0-9.]+)\""
+          - "openapi:\\s*['\"]?([0-9.]+)"
+      - type: regex
+        name: api-title
+        part: body
+        group: 1
+        regex:
+          - "\"title\":\\s*\"([^\"]+)\""
