@@ -1,0 +1,104 @@
+id: gitignore-exposure
+
+info:
+  name: Exposed .gitignore File - Detect
+  author: custom
+  severity: info
+  description: |
+    Detects publicly accessible .gitignore files that reveal internal
+    project structure, technology stack, sensitive file patterns,
+    and potential credential paths.
+  reference:
+    - https://git-scm.com/docs/gitignore
+    - https://owasp.org/www-project-web-security-testing-guide/
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+    cvss-score: 5.3
+    cwe-id: CWE-538
+  metadata:
+    verified: true
+    max-request: 1
+  tags: exposure,git,gitignore,config,discovery
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/.gitignore"
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "node_modules"
+          - ".env"
+          - "*.log"
+          - "vendor/"
+          - "__pycache__"
+          - ".idea"
+          - ".vscode"
+          - "*.pyc"
+          - "target/"
+          - "build/"
+          - "dist/"
+          - ".DS_Store"
+          - "*.class"
+          - "*.jar"
+          - "*.war"
+          - "coverage/"
+          - ".terraform"
+          - "*.tfstate"
+          - ".gradle"
+          - "composer.lock"
+          - "Thumbs.db"
+          - "*.swp"
+          - "*.swo"
+          - ".cache"
+          - "*.o"
+          - "*.so"
+          - "*.egg-info"
+          - "venv/"
+          - ".venv/"
+          - "npm-debug.log"
+          - "yarn-error.log"
+          - ".next/"
+          - ".nuxt/"
+          - ".output/"
+          - "*.sqlite"
+          - "*.db"
+        condition: or
+
+      - type: status
+        status:
+          - 200
+
+      # Evita falsos positivos de paginas HTML con 200
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        negative: true
+
+    extractors:
+      # Patrones que revelan archivos sensibles
+      - type: regex
+        name: sensitive-files
+        part: body
+        regex:
+          - "(?i)(\\.env[a-z.]*)"
+          - "(?i)(config[/\\\\][a-z_.]+)"
+          - "(?i)(secret[a-z_.]*)"
+          - "(?i)(credential[a-z_.]*)"
+          - "(?i)(password[a-z_.]*)"
+          - "(?i)(\\.aws[/\\\\]?)"
+          - "(?i)(\\.ssh[/\\\\]?)"
+          - "(?i)(id_rsa[a-z_.]*)"
+          - "(?i)(\\.pem)"
+          - "(?i)(\\.key)"
+          - "(?i)(\\.p12)"
+          - "(?i)(\\.pfx)"
+          - "(?i)(\\*\\.tfstate[a-z_.]*)"
+          - "(?i)(docker-compose[a-z_.]*)"
+          - "(?i)(Dockerfile)"
+          - "(?i)(\\.kube[/\\\\]?)"
+          - "(?i)(kubeconfig)"
+          - "(?i)(service.?account.*\\.json)"

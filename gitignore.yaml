@@ -1,0 +1,229 @@
+id: git-exposure
+
+info:
+  name: Exposed Git Files - Detect
+  author: custom
+  severity: medium
+  description: |
+    Detects publicly accessible Git metadata files such as .gitignore,
+    .git/config, .git/HEAD, and other Git-related files that may expose
+    internal project structure, credentials, or sensitive paths.
+  reference:
+    - https://owasp.org/www-project-web-security-testing-guide/latest/4-Web_Application_Security_Testing/02-Configuration_and_Deployment_Management_Testing/05-Enumerate_Infrastructure_and_Application_Admin_Interfaces
+    - https://blog.netspi.com/dumping-git-data-from-misconfigured-web-servers/
+  classification:
+    cvss-metrics: CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:L/I:N/A:N
+    cvss-score: 5.3
+    cwe-id: CWE-538
+  metadata:
+    verified: true
+    max-request: 30
+    shodan-query: "http.html:\".gitignore\""
+  tags: exposure,git,config,discovery,misconfig
+
+http:
+  # ============================================================
+  # FASE 1: .gitignore (el principal que pides)
+  # ============================================================
+  - method: GET
+    path:
+      - "{{BaseURL}}/.gitignore"
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "node_modules"
+          - ".env"
+          - "*.log"
+          - "vendor/"
+          - "__pycache__"
+          - ".idea"
+          - ".vscode"
+          - "*.pyc"
+          - "target/"
+          - "build/"
+          - "dist/"
+          - ".DS_Store"
+          - "*.class"
+          - "*.jar"
+          - "*.war"
+          - "coverage/"
+          - ".terraform"
+          - "*.tfstate"
+          - ".gradle"
+          - "composer.lock"
+          - "Thumbs.db"
+        condition: or
+
+      - type: status
+        status:
+          - 200
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        negative: true
+
+    extractors:
+      - type: regex
+        name: sensitive-patterns
+        part: body
+        regex:
+          - "(?i)(\\.env[a-z.]*)"
+          - "(?i)(config[/\\\\][a-z_.]+)"
+          - "(?i)(secret[a-z_.]*)"
+          - "(?i)(credential[a-z_.]*)"
+          - "(?i)(password[a-z_.]*)"
+          - "(?i)(\\.aws[/\\\\]?)"
+          - "(?i)(\\.ssh[/\\\\]?)"
+          - "(?i)(id_rsa[a-z_.]*)"
+          - "(?i)(\\.pem)"
+          - "(?i)(\\.key)"
+          - "(?i)(\\.p12)"
+          - "(?i)(\\.pfx)"
+          - "(?i)(\\*\\.tfstate[a-z_.]*)"
+          - "(?i)(docker-compose[a-z_.]*)"
+          - "(?i)(Dockerfile)"
+
+  # ============================================================
+  # FASE 2: .git/HEAD (confirma repositorio Git completo expuesto)
+  # Esto ya es severity HIGH si lo encuentra
+  # ============================================================
+  - method: GET
+    path:
+      - "{{BaseURL}}/.git/HEAD"
+
+    matchers-condition: and
+    matchers:
+      - type: regex
+        regex:
+          - "ref: refs/"
+
+      - type: status
+        status:
+          - 200
+
+    extractors:
+      - type: regex
+        name: branch
+        part: body
+        group: 1
+        regex:
+          - "ref: refs/heads/(.+)"
+
+  # ============================================================
+  # FASE 3: .git/config (expone URLs de repos, usuarios, tokens)
+  # Severity HIGH - puede contener credenciales
+  # ============================================================
+  - method: GET
+    path:
+      - "{{BaseURL}}/.git/config"
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          - "[core]"
+          - "[remote"
+          - "repositoryformatversion"
+        condition: or
+
+      - type: status
+        status:
+          - 200
+
+    extractors:
+      - type: regex
+        name: remote-url
+        part: body
+        group: 1
+        regex:
+          - "url\\s*=\\s*(.+)"
+
+  # ============================================================
+  # FASE 4: Otros archivos Git y de configuración sensibles
+  # ============================================================
+  - method: GET
+    path:
+      - "{{BaseURL}}{{paths}}"
+
+    payloads:
+      paths:
+        # Git internals
+        - "/.git/"
+        - "/.git/index"
+        - "/.git/logs/HEAD"
+        - "/.git/logs/refs/heads/main"
+        - "/.git/logs/refs/heads/master"
+        - "/.git/logs/refs/heads/develop"
+        - "/.git/COMMIT_EDITMSG"
+        - "/.git/description"
+        - "/.git/info/exclude"
+        - "/.git/packed-refs"
+        - "/.git/refs/heads/main"
+        - "/.git/refs/heads/master"
+        - "/.git/refs/heads/develop"
+        - "/.gitattributes"
+
+        # Otros archivos de control de versiones
+        - "/.svn/entries"
+        - "/.svn/wc.db"
+        - "/.hg/hgrc"
+        - "/.bzr/README"
+
+        # CI/CD configs (exponen estructura y secretos)
+        - "/.github/workflows/main.yml"
+        - "/.github/workflows/ci.yml"
+        - "/.github/workflows/deploy.yml"
+        - "/.github/workflows/build.yml"
+        - "/.gitlab-ci.yml"
+        - "/.travis.yml"
+        - "/Jenkinsfile"
+        - "/bitbucket-pipelines.yml"
+        - "/.circleci/config.yml"
+
+    stop-at-first-match: false
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        words:
+          # Git internals
+          - "DIRC"
+          - "commit "
+          - "tree "
+          - "author "
+          - "Unnamed repository"
+          - "gitdir:"
+          - "pack-refs"
+          - "ref:"
+          # SVN
+          - "svn:wc:ra_dav"
+          - "dir"
+          # HG
+          - "[paths]"
+          # BZR
+          - "Bazaar"
+          # CI/CD
+          - "jobs:"
+          - "stages:"
+          - "pipeline:"
+          - "steps:"
+          - "on:"
+          - "deploy:"
+          - "language:"
+          - "script:"
+          - "node"
+        condition: or
+
+      - type: status
+        status:
+          - 200
+
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        negative: true
